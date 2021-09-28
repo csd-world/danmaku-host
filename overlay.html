@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=600">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script src="webfx.min.js"></script>
+    <style>
+        body {
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .danmaku {
+            position: absolute;
+            font-family: sans-serif;
+            font-weight: 700;
+            line-height: 1;
+            color: white;
+            text-shadow: 0 0 .3em black, 0 0 .1em black;
+        }
+        .danmaku .pic {
+            width: 1.2em;
+            height: 1.2em;
+            vertical-align: sub;
+            border-radius: 50%;
+            margin-right: .2em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="danmakus" style="font-size: 40px;">
+    </div>
+    <script>
+        let fontSize = 40;
+        const lineHeightFactor = 1.2;
+
+        let duration = 10;
+
+        let danmakus = new webfx.ContainerView(document.getElementById('danmakus'));
+        class Danmaku extends webfx.View {
+            constructor() {
+                super();
+                this.text = '';
+                this.x = 0;
+                this.y = 0;
+                this.width = 0;
+                this.pic = '';
+            }
+            createDom() {
+                return {
+                    tag: 'div.danmaku',
+                    child: [
+                        { tag: 'img.pic', src: this.pic },
+                        this.text,
+                    ]
+                }
+            }
+            updateDom() {
+                super.updateDom();
+                this.dom.style.transform = `translate(${this.x}px, ${this.y}px)`;
+            }
+        }
+        let lastMove = Date.now();
+        function animate() {
+            const now = Date.now();
+            const step = (now - lastMove) * window.innerWidth / 1000 / duration;
+            lastMove = now;
+            const remove = [];
+            for (const d of danmakus) {
+                d.x -= step;
+                d.updateDom();
+                if (d.x + d.width < 0) remove.push(d);
+            }
+            for (const d of remove) {
+                danmakus.removeView(d);
+            }
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+        function addDanmaku(d) {
+            layoutDanmaku(d);
+            danmakus.addView(d);
+            d.width = d.dom.scrollWidth;
+        }
+        function layoutDanmaku(danmaku) {
+            const winWidth = window.innerWidth;
+            let y = 0;
+            while(true) {
+                for (const d of danmakus) {
+                    if (d.y == y && d.x + d.width >= winWidth - 100) {
+                        y += fontSize * lineHeightFactor;
+                        continue;
+                    }
+                }
+                break;
+            }
+            danmaku.x = winWidth;
+            danmaku.y = y;
+            danmaku.updateDom();
+        }
+        
+        const chan = new BroadcastChannel("danmaku");
+        chan.addEventListener('message', e => {
+            const msg = e.data;
+            if (msg.cmd == 'text') {
+                const d = new Danmaku();
+                d.text = msg.text;
+                d.pic = `https://q.qlogo.cn/g?b=qq&s=40&nk=${msg.sender.id}`
+                addDanmaku(d);
+            } else if (msg.cmd == 'setting') {
+                fontSize = msg.fontSize;
+                danmakus.dom.style.fontSize = msg.fontSize + 'px';
+                duration = msg.duration;
+            }
+        });
+        chan.postMessage({ cmd: 'sync' });
+
+        // {
+        //     const d = new Danmaku();
+        //     d.text = 'Hello🦊';
+        //     d.pic = `https://q.qlogo.cn/g?b=qq&s=40&nk=10000`
+        //     addDanmaku(d);
+        // }
+    </script>
+</body>
+
+</html>

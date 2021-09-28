@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DanmakuHost</title>
+</head>
+<body style="user-select: none;">
+    status: <span id="status"></span><br>
+    font-size: <input type="number" id="font-size" value="40" style="width: 50px;" onchange="updateSetting()"> px<br>
+    duration: <input type="number" id="duration" value="40" style="width: 50px;" onchange="updateSetting()"> sec<br>
+    secret: <br>
+    <input type="password" id="secret" style="display: block; width: 100%;" onchange="changeWs()">
+    <script>
+        const defaultSecret = '';
+
+        document.getElementById('font-size').value = localStorage.getItem("font-size") || '40';
+        document.getElementById('duration').value = localStorage.getItem("duration") || '10';
+        document.getElementById('secret').value = localStorage.getItem("secret") || defaultSecret;
+
+        const chan = new BroadcastChannel("danmaku");
+        chan.addEventListener('message', e => {
+            const msg = e.data;
+            if (msg.cmd == 'sync') {
+                updateSetting();
+            }
+        });
+        function showDanmaku(text, sender) {
+            chan.postMessage({ cmd: 'text', text, sender });
+        }
+        function updateSetting() {
+            const fontSize = +document.getElementById('font-size').value;
+            const duration = +document.getElementById('duration').value;
+            const secret = document.getElementById('secret').value;
+            localStorage.setItem("font-size", fontSize);
+            localStorage.setItem("duration", duration);
+            localStorage.setItem("secret", secret == defaultSecret ? "" : secret);
+            chan.postMessage({ cmd: 'setting', fontSize, duration });
+        }
+        function changeWs() {
+            updateSetting();
+            try { lastws && lastws.close(); } catch { }
+        }
+        updateSetting();
+
+
+        function status(text) {
+            document.getElementById('status').textContent = text;
+        }
+        let lastws = null;
+        function connect() {
+            const ws = lastws = new WebSocket(document.getElementById('secret').value);
+            status("Connecting...");
+            ws.onopen = (e) => {
+                status("OK");
+            };
+            ws.onclose = (e) => {
+                status("Closed...");
+                setTimeout(connect, 2000);
+            };
+            ws.onmessage = (e) => {
+                if (typeof e.data == 'string') {
+                    const msg = JSON.parse(e.data);
+                    console.info(msg);
+                    if (!msg || !msg.data || !msg.data.messageChain) return;
+                    var textmsg = msg.data.messageChain
+                        .map(x => {
+                            if (x.type == 'Plain') return x.text;
+                            if (x.type == 'Face') return `[${x.name}]`
+                        })
+                        .filter(x => x)
+                        .join('');
+                    if (textmsg.length > 0 && textmsg.length < 50 && !textmsg.match(/^\s+$/)) {
+                        console.info("Msg Text: ", textmsg);
+                        showDanmaku(textmsg, msg.data.sender);
+                    }
+                }
+            };
+        }
+
+
+        connect();
+    </script>
+</body>
+</html>
