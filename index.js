@@ -1,5 +1,7 @@
-const { app, BrowserWindow, globalShortcut, dialog } = require('electron')
+const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const { isHidden, toggleHidden, tryShow } = require('./mylib');
+
+const DEBUG = false;
 
 if (process.platform == 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');
@@ -59,7 +61,7 @@ function createWindow(fullscreen, options) {
 function openIndex() {
   if (tryShow(winIndex)) return;
   const win = winIndex = createWindow(false, {
-    width: 300, height: 200,
+    width: 300, height: 250,
     maximizable: false,
   });
   win.loadFile('index.html');
@@ -68,13 +70,14 @@ function openIndex() {
 }
 
 function openOverlay() {
-  const win = createWindow(true, {
-    transparent: true,
-    alwaysOnTop: true,
+  const win = createWindow(!DEBUG, {
+    transparent: !DEBUG,
+    alwaysOnTop: !DEBUG,
   });
   win.loadFile('overlay.html');
   win.show();
-  win.setIgnoreMouseEvents(true);
+  if (!DEBUG)
+    win.setIgnoreMouseEvents(true);
 }
 
 function openNamedPage(file, url) {
@@ -110,9 +113,9 @@ app.on('window-all-closed', () => {
   // On macOS it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
   if (process.platform !== 'darwin') {
-    app.quit()
+    app.quit();
   }
-})
+});
 
 app.on('activate', () => {
   // // On macOS it's common to re-create a window in the app when the
@@ -120,7 +123,7 @@ app.on('activate', () => {
   // if (win === null) {
   //   createWindow()
   // }
-})
+});;
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
