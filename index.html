@@ -10,13 +10,17 @@
     status: <span id="status"></span><br>
     font-size: <input type="number" id="font-size" value="40" style="width: 50px;" onchange="updateSetting()"> px<br>
     duration: <input type="number" id="duration" value="40" style="width: 50px;" onchange="updateSetting()"> sec<br>
+    colors: <br>
+    <input type="text" id="colors" value="" style="display: block; width: 100%;" onchange="updateSetting()">
     secret: <br>
     <input type="password" id="secret" style="display: block; width: 100%;" onchange="changeWs()">
     <script>
         const defaultSecret = '';
+        const defaultColors = '#FCA5A5,#FCD34D,#6EE7B7';
 
         document.getElementById('font-size').value = localStorage.getItem("font-size") || '40';
         document.getElementById('duration').value = localStorage.getItem("duration") || '10';
+        document.getElementById('colors').value = localStorage.getItem("colors") || defaultColors;
         document.getElementById('secret').value = localStorage.getItem("secret") || defaultSecret;
 
         const chan = new BroadcastChannel("danmaku");
@@ -32,11 +36,13 @@
         function updateSetting() {
             const fontSize = +document.getElementById('font-size').value;
             const duration = +document.getElementById('duration').value;
+            const colors = document.getElementById('colors').value;
             const secret = document.getElementById('secret').value;
             localStorage.setItem("font-size", fontSize);
             localStorage.setItem("duration", duration);
+            localStorage.setItem("colors", colors);
             localStorage.setItem("secret", secret == defaultSecret ? "" : secret);
-            chan.postMessage({ cmd: 'setting', fontSize, duration });
+            chan.postMessage({ cmd: 'setting', fontSize, duration, colors });
         }
         function changeWs() {
             updateSetting();

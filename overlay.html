@@ -40,6 +40,8 @@
 
         let duration = 10;
 
+        let colors = ['white'];
+
         let danmakus = new webfx.ContainerView(document.getElementById('danmakus'));
         class Danmaku extends webfx.View {
             constructor() {
@@ -49,10 +51,12 @@
                 this.y = 0;
                 this.width = 0;
                 this.pic = '';
+                this.color = 'white';
             }
             createDom() {
                 return {
                     tag: 'div.danmaku',
+                    style: `color: ${this.color};`,
                     child: [
                         { tag: 'img.pic', src: this.pic },
                         this.text,
@@ -109,12 +113,15 @@
             if (msg.cmd == 'text') {
                 const d = new Danmaku();
                 d.text = msg.text;
-                d.pic = `https://q.qlogo.cn/g?b=qq&s=40&nk=${msg.sender.id}`
+                d.pic = `https://q.qlogo.cn/g?b=qq&s=40&nk=${msg.sender.id}`;
+                d.color = colors[msg.sender.id % colors.length];
                 addDanmaku(d);
             } else if (msg.cmd == 'setting') {
                 fontSize = msg.fontSize;
                 danmakus.dom.style.fontSize = msg.fontSize + 'px';
                 duration = msg.duration;
+                colors = msg.colors.split(',').filter(x => x);
+                if (colors.length == 0) colors = ['white'];
             }
         });
         chan.postMessage({ cmd: 'sync' });
