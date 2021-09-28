@@ -5,6 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DanmakuHost</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 <body style="user-select: none;">
     status: <span id="status"></span><br>
@@ -27,6 +32,7 @@
         chan.addEventListener('message', e => {
             const msg = e.data;
             if (msg.cmd == 'sync') {
+                console.info("send settings by sync");
                 updateSetting();
             }
         });
@@ -81,13 +87,15 @@
                     console.info(msg);
                     if (!msg || !msg.data || !msg.data.messageChain) return;
                     var textmsg = msg.data.messageChain
+                        .filter(x => x.type == 'Plain' || x.type == 'Face');
+                    var str = msg.data.messageChain
                         .map(x => {
                             if (x.type == 'Plain') return x.text;
-                            if (x.type == 'Face') return `[${x.name}]`
+                            if (x.type == 'Face') return "xx";
                         })
                         .filter(x => x)
                         .join('');
-                    if (textmsg.length > 0 && textmsg.length < 50 && !textmsg.match(/^\s+$/)) {
+                    if (str.length > 0 && str.length <= 25 && !str.match(/^\s+$/)) {
                         console.info("Msg Text: ", textmsg);
                         showDanmaku(textmsg, msg.data.sender);
                     }
