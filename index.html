@@ -40,7 +40,8 @@
         }
         function changeWs() {
             updateSetting();
-            try { lastws && lastws.close(); } catch { }
+            try { ws && ws.close(); } catch { }
+            if (!ws && !retrying) connect();
         }
         updateSetting();
 
@@ -48,15 +49,24 @@
         function status(text) {
             document.getElementById('status').textContent = text;
         }
-        let lastws = null;
+        let retrying = false;
+        let ws = null;
         function connect() {
-            const ws = lastws = new WebSocket(document.getElementById('secret').value);
+            retrying = false;
+            try {
+                ws = new WebSocket(document.getElementById('secret').value);
+            } catch {
+                status("Bad URL");
+                return;
+            }
             status("Connecting...");
             ws.onopen = (e) => {
                 status("OK");
             };
             ws.onclose = (e) => {
                 status("Closed...");
+                ws = null;
+                retrying = true;
                 setTimeout(connect, 2000);
             };
             ws.onmessage = (e) => {
