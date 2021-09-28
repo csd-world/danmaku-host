@@ -1,6 +1,10 @@
 const { app, BrowserWindow, globalShortcut, dialog } = require('electron')
 const { isHidden, toggleHidden, tryShow } = require('./mylib');
 
+if (process.platform == 'linux') {
+  app.commandLine.appendSwitch('enable-transparent-visuals');
+  app.commandLine.appendSwitch('disable-gpu');
+}
 
 
 if (!app.requestSingleInstanceLock()) {
