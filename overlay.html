@@ -48,7 +48,7 @@
     </div>
     <script>
         let fontSize = 40;
-        const lineHeightFactor = 1.2;
+        const lineHeightFactor = 1.5;
 
         let duration = 10;
 
@@ -62,6 +62,7 @@
             constructor() {
                 super();
                 this.text = '';
+                this.plaintext = '';
                 this.x = 0;
                 this.y = 0;
                 this.width = 0;
@@ -82,9 +83,18 @@
                 super.updateDom();
                 this.dom.style.transform = `translate(${this.x}px, ${this.y}px)`;
             }
-            addPic(pic) {
-                this.pics.addView(new View({ tag: 'img.pic', src: pic }));
+            addSender(id) {
+                this.pics.addView(new SenderPic(id));
                 this.width = this.dom.scrollWidth;
+            }
+        }
+        class SenderPic extends View {
+            constructor(id) {
+                super();
+                this.id = id;
+            }
+            createDom() {
+                return { tag: 'img.pic', src: qqpic(this.id) };
             }
         }
         let lastMove = Date.now();
@@ -111,12 +121,13 @@
         }
         function layoutDanmaku(danmaku) {
             const winWidth = window.innerWidth;
+            const lineHeight = fontSize * lineHeightFactor;
             let y = 0;
-            while(true) {
+            outer: while(true) {
                 for (const d of danmakus) {
-                    if (d.y == y && d.x + d.width >= winWidth - fontSize * 3) {
-                        y += fontSize * lineHeightFactor;
-                        continue;
+                    if (d.y == y && d.x + d.dom.offsetWidth >= winWidth - fontSize) {
+                        y += lineHeight;
+                        continue outer;
                     }
                 }
                 break;
@@ -130,19 +141,27 @@
         chan.addEventListener('message', e => {
             const msg = e.data;
             if (msg.cmd == 'text') {
+                const plaintext = msg.text.map(x => {
+                    if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
+                    if (x.type == 'Face') return `[face:${x.faceId}]`;
+                }).join('');
                 for (const it of danmakus) {
-                    if (it.text == msg.text && it.x >= window.innerWidth * 0.25) {
-                        it.addPic(qqpic(msg.sender.id));
+                    if (it.plaintext == plaintext && it.x >= window.innerWidth * 0.25) {
+                        for (const pic of it.pics) {
+                            if (pic.id == msg.sender.id) return;
+                        }
+                        it.addSender(msg.sender.id);
                         return;
                     }
                 }
                 const d = new Danmaku();
                 d.color = colors[msg.sender.id % colors.length];
+                d.plaintext = plaintext;
                 d.text = msg.text.map(x => {
                     if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
                     if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceId) });
                 }); 
-                d.addPic(qqpic(msg.sender.id));
+                d.addSender(msg.sender.id);
                 addDanmaku(d);
             } else if (msg.cmd == 'setting') {
                 fontSize = msg.fontSize;
