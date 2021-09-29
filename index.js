@@ -75,7 +75,7 @@ function openOverlay() {
     alwaysOnTop: !DEBUG,
   });
   win.loadFile('overlay.html');
-  win.show();
+  win.showInactive();
   if (!DEBUG)
     win.setIgnoreMouseEvents(true);
 }
