@@ -100,6 +100,11 @@
                     if (gid != document.getElementById('groupid').value) return;
                     var textmsg = msg.data.messageChain
                         .filter(x => x.type == 'Plain' || x.type == 'Face' || x.type == 'At');
+                    var match;
+                    if (textmsg.length == 1 && textmsg[0].type == 'Plain'
+                        && (match = textmsg[0].text.match(/\[(.+)\]请使用最新版手机QQ体验新功能/))) {
+                        textmsg[0].text = `[${match[1]}]`;
+                    }
                     var str = msg.data.messageChain
                         .map(x => {
                             if (x.type == 'Plain') return x.text;
