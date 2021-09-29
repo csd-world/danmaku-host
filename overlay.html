@@ -27,13 +27,16 @@
         .danmaku .pic {
             width: 1.2em;
             height: 1.2em;
-            vertical-align: sub;
+            vertical-align: middle;
             border-radius: 50%;
             margin-right: .2em;
             box-shadow: 0 0 .3em rgba(0,0,0,0.24);
         }
-        .danmaku .pic + .pic {
+        .danmaku .sender + .sender {
             margin-left: -.8em;
+        }
+        .danmaku .pic.at {
+            font-size: 80%;
         }
         .danmaku .qface {
             width: 1em;
@@ -67,14 +70,14 @@
                 this.y = 0;
                 this.width = 0;
                 this.color = 'white';
-                this.pics = new ContainerView({tag: 'span.pics'});
+                this.avatars = new ContainerView({tag: 'span.pics'});
             }
             createDom() {
                 return {
                     tag: 'div.danmaku',
                     style: `color: ${this.color};`,
                     child: [
-                        this.pics,
+                        this.avatars,
                         this.textView = new View({ tag: 'span.text', child: this.text }),
                     ]
                 }
@@ -84,17 +87,18 @@
                 this.dom.style.transform = `translate(${this.x}px, ${this.y}px)`;
             }
             addSender(id) {
-                this.pics.addView(new SenderPic(id));
+                this.avatars.addView(new Avatar(id, 'sender'));
                 this.width = this.dom.scrollWidth;
             }
         }
-        class SenderPic extends View {
-            constructor(id) {
+        class Avatar extends View {
+            constructor(id, type) {
                 super();
+                this.type = type;
                 this.id = id;
             }
             createDom() {
-                return { tag: 'img.pic', src: qqpic(this.id) };
+                return { tag: 'img.pic.' + this.type, src: qqpic(this.id) };
             }
         }
         let lastMove = Date.now();
@@ -144,10 +148,11 @@
                 const plaintext = msg.text.map(x => {
                     if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
                     if (x.type == 'Face') return `[face:${x.faceId}]`;
+                    if (x.type == 'At') return `[at:${x.target}]`;
                 }).join('');
                 for (const it of danmakus) {
                     if (it.plaintext == plaintext && it.x >= window.innerWidth * 0.25) {
-                        for (const pic of it.pics) {
+                        for (const pic of it.avatars) {
                             if (pic.id == msg.sender.id) return;
                         }
                         it.addSender(msg.sender.id);
@@ -160,6 +165,7 @@
                 d.text = msg.text.map(x => {
                     if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
                     if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceId) });
+                    if (x.type == 'At') return ['@', new Avatar(x.target, 'at')];
                 }); 
                 d.addSender(msg.sender.id);
                 addDanmaku(d);

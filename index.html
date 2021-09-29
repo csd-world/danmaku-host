@@ -99,11 +99,12 @@
                     const gid = "" + msg.data.sender.group.id;
                     if (gid != document.getElementById('groupid').value) return;
                     var textmsg = msg.data.messageChain
-                        .filter(x => x.type == 'Plain' || x.type == 'Face');
+                        .filter(x => x.type == 'Plain' || x.type == 'Face' || x.type == 'At');
                     var str = msg.data.messageChain
                         .map(x => {
                             if (x.type == 'Plain') return x.text;
                             if (x.type == 'Face') return "xx";
+                            if (x.type == 'At') return '@xx';
                         })
                         .filter(x => x)
                         .join('');
