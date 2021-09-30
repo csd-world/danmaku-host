@@ -14,6 +14,7 @@
 <body style="user-select: none;">
     status: <span id="status"></span><br>
     enabled: <input type="checkbox" id="enabled" onchange="updateSetting()" checked><br>
+    dedup: <input type="checkbox" id="dedup" onchange="updateSetting()" checked><br>
     messages: <span id="messages-count">0</span><br>
     <details style="border: solid 1px gray; margin-top: 8px; padding: 8px; border-radius: 8px;">
         <summary style="outline: none;">Settings</summary>
@@ -33,6 +34,7 @@
         document.getElementById('font-size').value = localStorage.getItem("font-size") || '40';
         document.getElementById('duration').value = localStorage.getItem("duration") || '10';
         document.getElementById('groupid').value = localStorage.getItem("groupid") || '0';
+        document.getElementById('dedup').checked = (localStorage.getItem("dedup") == 'true') || true;
         document.getElementById('colors').value = localStorage.getItem("colors") || defaultColors;
         document.getElementById('secret').value = localStorage.getItem("secret") || defaultSecret;
 
@@ -57,14 +59,16 @@
             const duration = +document.getElementById('duration').value;
             const groupid = +document.getElementById('groupid').value;
             const enabled = document.getElementById('enabled').checked;
+            const dedup = document.getElementById('dedup').checked;
             const colors = document.getElementById('colors').value;
             const secret = document.getElementById('secret').value;
             localStorage.setItem("font-size", fontSize);
             localStorage.setItem("duration", duration);
             localStorage.setItem("colors", colors);
             localStorage.setItem("groupid", groupid);
+            localStorage.setItem("dedup", dedup);
             localStorage.setItem("secret", secret == defaultSecret ? "" : secret);
-            const msg = { cmd: 'setting', fontSize, duration, colors, enabled };
+            const msg = { cmd: 'setting', fontSize, duration, colors, enabled, dedup };
             console.info(msg);
             chan.postMessage(msg);
         }

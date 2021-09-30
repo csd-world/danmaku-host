@@ -63,6 +63,8 @@
 
         let enabled = true;
 
+        let dedup = true;
+
         const { View, ContainerView, Toast } = webfx;
 
         /** @type {Danmaku[]} */
@@ -156,13 +158,15 @@
                     if (x.type == 'Face') return `[face:${x.faceId}]`;
                     if (x.type == 'At') return `[at:${x.target}]`;
                 }).join('');
-                for (const it of danmakus) {
-                    if (it.plaintext == plaintext && it.x >= window.innerWidth * 0.25) {
-                        for (const pic of it.avatars) {
-                            if (pic.id == msg.sender.id) return;
+                if (dedup) {
+                    for (const it of danmakus) {
+                        if (it.plaintext == plaintext && it.x >= window.innerWidth * 0.25) {
+                            for (const pic of it.avatars) {
+                                if (pic.id == msg.sender.id) return;
+                            }
+                            it.addSender(msg.sender.id);
+                            return;
                         }
-                        it.addSender(msg.sender.id);
-                        return;
                     }
                 }
                 const d = new Danmaku();
@@ -181,6 +185,7 @@
                 duration = msg.duration;
                 colors = msg.colors.split(',').filter(x => x);
                 enabled = msg.enabled;
+                dedup = msg.dedup;
                 danmakus.dom.style.opacity = enabled ? '' : '0';
                 if (colors.length == 0) colors = ['white'];
             } else if (msg.cmd == 'toggled') {
