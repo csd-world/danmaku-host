@@ -13,6 +13,7 @@
 </head>
 <body style="user-select: none;">
     status: <span id="status"></span><br>
+    enabled: <input type="checkbox" id="enabled" onchange="updateSetting()" checked><br>
     messages: <span id="messages-count">0</span><br>
     <details style="border: solid 1px gray; margin-top: 8px; padding: 8px; border-radius: 8px;">
         <summary style="outline: none;">Settings</summary>
@@ -46,10 +47,16 @@
         function showDanmaku(text, sender) {
             chan.postMessage({ cmd: 'text', text, sender });
         }
+        function toggle() {
+            document.getElementById('enabled').checked ^= true;
+            updateSetting();
+            chan.postMessage({cmd: 'toggled'});
+        }
         function updateSetting() {
             const fontSize = +document.getElementById('font-size').value;
             const duration = +document.getElementById('duration').value;
             const groupid = +document.getElementById('groupid').value;
+            const enabled = document.getElementById('enabled').checked;
             const colors = document.getElementById('colors').value;
             const secret = document.getElementById('secret').value;
             localStorage.setItem("font-size", fontSize);
@@ -57,7 +64,9 @@
             localStorage.setItem("colors", colors);
             localStorage.setItem("groupid", groupid);
             localStorage.setItem("secret", secret == defaultSecret ? "" : secret);
-            chan.postMessage({ cmd: 'setting', fontSize, duration, colors });
+            const msg = { cmd: 'setting', fontSize, duration, colors, enabled };
+            console.info(msg);
+            chan.postMessage(msg);
         }
         function changeWs() {
             updateSetting();

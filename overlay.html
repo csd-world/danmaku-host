@@ -43,6 +43,9 @@
             height: 1.2em;
             vertical-align: sub;
         }
+        .toasts-container {
+            width: 200px !important;
+        }
     </style>
 </head>
 
@@ -50,6 +53,7 @@
     <div id="danmakus" style="font-size: 40px;">
     </div>
     <script>
+        webfx.injectWebfxCss();
         let fontSize = 40;
         const lineHeightFactor = 1.5;
 
@@ -57,7 +61,9 @@
 
         let colors = ['white'];
 
-        const { View, ContainerView } = webfx;
+        let enabled = true;
+
+        const { View, ContainerView, Toast } = webfx;
 
         /** @type {Danmaku[]} */
         let danmakus = new ContainerView(document.getElementById('danmakus'));
@@ -174,7 +180,11 @@
                 danmakus.dom.style.fontSize = msg.fontSize + 'px';
                 duration = msg.duration;
                 colors = msg.colors.split(',').filter(x => x);
+                enabled = msg.enabled;
+                danmakus.dom.style.opacity = enabled ? '' : '0';
                 if (colors.length == 0) colors = ['white'];
+            } else if (msg.cmd == 'toggled') {
+                Toast.show(enabled ? "弹幕开启" : "弹幕关闭", 3000);
             }
         });
         chan.postMessage({ cmd: 'sync' });

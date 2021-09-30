@@ -67,6 +67,7 @@ function openIndex() {
   win.loadFile('index.html');
   win.show();
   win.on('close', () => app.quit());
+  return win;
 }
 
 function openOverlay() {
@@ -104,8 +105,11 @@ app.on('second-instance', (event, commandLine, workingDirectory) => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
-  openIndex();
+  const index = openIndex();
   openOverlay();
+  globalShortcut.register('F1', () => {
+    index.webContents.executeJavaScript("toggle()");
+  });
 });
 
 // Quit when all windows are closed.
