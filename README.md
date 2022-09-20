@@ -21,4 +21,5 @@
 
 ## TODO
 
-集成 [oicq](https://github.com/takayama-lily/oicq) 等 bot 库，独立运行。
+- 用 React 重写 (?)
+- 集成 [oicq](https://github.com/takayama-lily/oicq) 等 bot 库，独立运行。
