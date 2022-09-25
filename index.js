@@ -2,6 +2,7 @@ const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const { isHidden, toggleHidden, tryShow } = require('./mylib');
 
 const DEBUG = false;
+// const DEBUG = true;
 
 if (process.platform == 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');

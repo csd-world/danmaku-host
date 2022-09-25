@@ -69,7 +69,7 @@
             localStorage.setItem("dedup", dedup);
             localStorage.setItem("secret", secret == defaultSecret ? "" : secret);
             const msg = { cmd: 'setting', fontSize, duration, colors, enabled, dedup };
-            console.info(msg);
+            // console.info(msg);
             chan.postMessage(msg);
         }
         function changeWs() {
@@ -107,29 +107,24 @@
             ws.onmessage = (e) => {
                 if (typeof e.data == 'string') {
                     const msg = JSON.parse(e.data);
-                    console.info(msg);
-                    if (!msg.data || msg.data.type !== "GroupMessage") return;
-                    const gid = "" + msg.data.sender.group.id;
+                    if (!msg || msg.ClassType !== "GroupMessage") return;
+                    const gid = msg.group_id;
                     if (gid != document.getElementById('groupid').value) return;
-                    var textmsg = msg.data.messageChain
-                        .filter(x => x.type == 'Plain' || x.type == 'Face' || x.type == 'At');
+                    console.info(msg);
+                    var textmsg = msg.message
+                        
                     var match;
                     if (textmsg.length == 1 && textmsg[0].type == 'Plain'
                         && (match = textmsg[0].text.match(/\[(.+)\]请使用最新版手机QQ体验新功能/))) {
                         textmsg[0].text = `[${match[1]}]`;
                     }
-                    var str = msg.data.messageChain
-                        .map(x => {
-                            if (x.type == 'Plain') return x.text;
-                            if (x.type == 'Face') return "xx";
-                            if (x.type == 'At') return '@xx';
-                        })
-                        .filter(x => x)
-                        .join('');
+                    
+                    var str = Array.from(msg.message).join('');
+
                     if (str.length > 0 && str.length <= 25 && !str.match(/^\s+$/)) {
                         document.getElementById('messages-count').textContent -= -1;
                         console.info("Msg Text: ", textmsg);
-                        showDanmaku(textmsg, msg.data.sender);
+                        showDanmaku(textmsg, msg.sender);
                     }
                 }
             };
