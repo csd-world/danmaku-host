@@ -152,12 +152,9 @@
         const chan = new BroadcastChannel("danmaku");
         chan.addEventListener('message', e => {
             const msg = e.data;
+            console.info(msg)
             if (msg.cmd == 'text') {
-                const plaintext = msg.text.map(x => {
-                    if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
-                    if (x.type == 'Face') return `[face:${x.faceId}]`;
-                    if (x.type == 'At') return `[at:${x.target}]`;
-                }).join('');
+                const plaintext = Array.from(msg.text).join('')
                 if (dedup) {
                     for (const it of danmakus) {
                         if (it.plaintext == plaintext && it.x >= window.innerWidth * 0.25) {
@@ -170,14 +167,15 @@
                     }
                 }
                 const d = new Danmaku();
-                d.color = colors[msg.sender.id % colors.length];
+                d.color = colors[msg.sender.user_id % colors.length];
                 d.plaintext = plaintext;
-                d.text = msg.text.map(x => {
-                    if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
-                    if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceId) });
-                    if (x.type == 'At') return ['@', new Avatar(x.target, 'at')];
-                }); 
-                d.addSender(msg.sender.id);
+                // d.text = msg.text.map(x => {
+                //     if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
+                //     if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceid) });
+                //     if (x.type == 'At') return ['@', new Avatar(x.target, 'at')];
+                // });
+                d.text = msg.text 
+                d.addSender(msg.sender.user_id);
                 addDanmaku(d);
             } else if (msg.cmd == 'setting') {
                 fontSize = msg.fontSize;
