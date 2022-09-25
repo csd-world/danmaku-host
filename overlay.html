@@ -174,9 +174,11 @@
                 //     if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceid) });
                 //     if (x.type == 'At') return ['@', new Avatar(x.target, 'at')];
                 // });
+                
 
                 if (msg.text.match(/\[.*face,/)) {
-                    d.text = new View({ tag: 'img.qface', src: qqface(msg.text.split('=')[1].split(']')[0]) });
+                    const faceId = msg.text.split('=')[1].split(']')[0]
+                    d.text = new View({ tag: 'img.qface', src: `./gif/s${faceId}.gif` });
                 } else if (msg.text.match(/\[.*at,/)) {
                     d.text = ['@', new Avatar(msg.text.split('=')[1], 'at')];
                 } else {
