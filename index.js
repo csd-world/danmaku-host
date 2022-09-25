@@ -1,8 +1,8 @@
 const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const { isHidden, toggleHidden, tryShow } = require('./mylib');
 
-const DEBUG = false;
-// const DEBUG = true;
+// const DEBUG = false;
+const DEBUG = true;
 
 if (process.platform == 'linux') {
   app.commandLine.appendSwitch('enable-transparent-visuals');
@@ -46,7 +46,7 @@ function createWindow(fullscreen, options) {
   lastWindow = win;
 
   // Open the DevTools.
-  // win.webContents.openDevTools()
+  win.webContents.openDevTools()
 
   // Emitted when the window is closed.
   win.on('closed', () => {

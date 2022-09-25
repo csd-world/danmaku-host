@@ -174,7 +174,15 @@
                 //     if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceid) });
                 //     if (x.type == 'At') return ['@', new Avatar(x.target, 'at')];
                 // });
-                d.text = msg.text 
+
+                if (msg.text.match(/\[.*face,/)) {
+                    d.text = new View({ tag: 'img.qface', src: qqface(msg.text.split('=')[1].split(']')[0]) });
+                } else if (msg.text.match(/\[.*at,/)) {
+                    d.text = ['@', new Avatar(msg.text.split('=')[1], 'at')];
+                } else {
+                    d.text = msg.text 
+                }
+
                 d.addSender(msg.sender.user_id);
                 addDanmaku(d);
             } else if (msg.cmd == 'setting') {
