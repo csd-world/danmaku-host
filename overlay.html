@@ -169,21 +169,23 @@
                 const d = new Danmaku();
                 d.color = colors[msg.sender.user_id % colors.length];
                 d.plaintext = plaintext;
-                // d.text = msg.text.map(x => {
-                //     if (x.type == 'Plain') return x.text.replace(/\n/g, ' ');
-                //     if (x.type == 'Face') return new View({ tag: 'img.qface', src: qqface(x.faceid) });
-                //     if (x.type == 'At') return ['@', new Avatar(x.target, 'at')];
-                // });
                 
 
-                if (msg.text.match(/\[.*face,/)) {
-                    const faceId = msg.text.split('=')[1].split(']')[0]
-                    d.text = new View({ tag: 'img.qface', src: `./gif/s${faceId}.gif` });
-                } else if (msg.text.match(/\[.*at,/)) {
-                    d.text = ['@', new Avatar(msg.text.split('=')[1], 'at')];
-                } else {
-                    d.text = msg.text 
-                }
+                
+                msg.text = msg.text.split(/\[*\]/).flatMap(item => item.split(/\[/))
+                
+
+                d.text = msg.text.map(x => {
+                    if (x.match(/CQ:at,qq=\d*/)) {
+                        return ['@', new Avatar(x.split('=')[1], 'at')]
+                    }
+                    if (x.match(/CQ:face,id=\d*/)) {
+                        const faceId = x.split('=')[1]
+                        return new View({ tag: 'img.qface', src: `./gif/s${faceId}.gif` })
+                    }
+                    return x.replace(/\n/g, ' ')
+                })
+
 
                 d.addSender(msg.sender.user_id);
                 addDanmaku(d);

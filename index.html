@@ -120,8 +120,10 @@
                     }
                     
                     var str = Array.from(msg.message).join('');
+                    
+                    console.log(str.toString());
 
-                    if (str.length > 0 && str.length <= 25 && !str.match(/^\s+$/)) {
+                    if (str.length > 0 && str.length <= 60 && !str.match(/^\s+$/)) {
                         document.getElementById('messages-count').textContent -= -1;
                         console.info("Msg Text: ", textmsg);
                         showDanmaku(textmsg, msg.sender);
