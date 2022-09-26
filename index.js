@@ -33,7 +33,7 @@ function createWindow(fullscreen, options) {
     width: 800, height: 600,
     fullscreen: fullscreen, frame: !fullscreen, resizable: !fullscreen,
     // transparent: fullscreen,
-    thick: fullscreen,
+    // thick: fullscreen,
     skipTaskbar: fullscreen,
     webPreferences: { nodeIntegration: true },
     // alwaysOnTop: true,
@@ -78,6 +78,7 @@ function openOverlay() {
   });
   win.loadFile('overlay.html');
   win.showInactive();
+  win.setAlwaysOnTop(true, 'screen-saver') //set topWindow
   if (!DEBUG)
     win.setIgnoreMouseEvents(true);
 }

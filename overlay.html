@@ -155,13 +155,14 @@
             console.info(msg)
             if (msg.cmd == 'text') {
                 const plaintext = Array.from(msg.text).join('')
+                // 去重消息
                 if (dedup) {
                     for (const it of danmakus) {
                         if (it.plaintext == plaintext && it.x >= window.innerWidth * 0.25) {
                             for (const pic of it.avatars) {
-                                if (pic.id == msg.sender.id) return;
+                                if (pic.id == msg.sender.user_id) return;
                             }
-                            it.addSender(msg.sender.id);
+                            it.addSender(msg.sender.user_id);
                             return;
                         }
                     }
