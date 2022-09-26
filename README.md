@@ -19,6 +19,12 @@
 - overlay.html
     - 渲染弹幕的窗口
 
+## 打包发布
+- 加入electron-forge作为打包工具，打包文件在本地out目录下
+- ``` bash
+    npm install
+    npm run make
+  ```
 ## TODO
 
 - 用 React 重写 (?)
