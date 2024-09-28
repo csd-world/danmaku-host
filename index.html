@@ -113,15 +113,14 @@
                     if (!msg || msg.post_type !== "message") return;
                     const gid = msg.group_id;
                     if (gid != document.getElementById('groupid').value) return;
-                    console.info(msg);
-                    var textmsg = msg.message
+
+                    var textmsg = msg.message[0].data.text
 
                     var match;
                     if (textmsg.length == 1 && textmsg[0].type == 'Plain'
                         && (match = textmsg[0].text.match(/\[(.+)\]请使用最新版手机QQ体验新功能/))) {
                         textmsg[0].text = `[${match[1]}]`;
                     }
-
                     var str = Array.from(msg.message).join('');
 
                     console.log(str.toString());
